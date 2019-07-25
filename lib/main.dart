@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:authenticator/detail.dart';
 import 'package:authenticator/item.dart';
 import 'package:authenticator/otp.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Authenticator',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: HomePage(),
     );
   }
@@ -30,7 +31,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _loading = true;
   List<Item> items = List();
-  int timer = 0;
   String barcode = "";
 
   final storage = new FlutterSecureStorage();
@@ -39,11 +39,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _load();
-    Timer.periodic(
-        Duration(seconds: 1),
-        (Timer t) => setState(() {
-              timer += 1;
-            }));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   _load() async {
@@ -51,6 +51,12 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       items =
           store.values.map((item) => Item.fromJson(jsonDecode(item))).toList();
+      items.add(Item.fromUri(
+          'otpauth://totp/Github:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Google:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
       _loading = false;
     });
   }
@@ -67,14 +73,14 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           : ListView.separated(
-              separatorBuilder: (context, index) => Divider(
-//                color: Colors.black,
-                  ),
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
                 return _buildItem(item);
               },
+              separatorBuilder: (context, index) => Divider(
+                  // color: Colors.black,
+                  ),
             ),
     );
   }
@@ -94,22 +100,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildItem(Item item) {
-    var code = OTP.generateTOTPCode(item.secret);
     return ListTile(
-      leading: Icon(Icons.timelapse, size: 47),
-      title: Text(
-        item.issuer,
-      ),
-      subtitle: Text(
-        code,
-        style: TextStyle(fontFamily: 'Karla', fontSize: 47),
-      ),
-//      trailing: CircularProgressIndicator(
-//        value: timer % 30 / 30,
-//          valueColor:
-//              AlwaysStoppedAnimation<Color>(Theme.of(context).accentColor),
-//      ),
-    );
+        leading: _buildLogo(item.issuer),
+        title: Text(
+          item.issuer,
+          style: TextStyle(fontFamily: 'Karla', fontSize: 24),
+        ),
+        subtitle: Text(
+          item.account,
+          style: TextStyle(fontFamily: 'Karla', fontSize: 18),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Detail(item: item)),
+          );
+        });
   }
 
   Future _scan(BuildContext context) async {
@@ -152,5 +158,16 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       _showSnackBar(context, "That's not a valid QR code");
     }
+  }
+
+  _buildLogo(String issuer) {
+    var issuers = ['amazon', 'github', 'default'];
+
+    var name = issuer.toLowerCase();
+    if (!issuers.contains(name)) {
+      name = 'default';
+    }
+
+    return Image.asset('assets/issuers/$name-icon.png');
   }
 }

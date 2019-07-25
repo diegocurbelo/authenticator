@@ -36,8 +36,8 @@ class Item {
       var label = u.pathSegments.first;
       if (label.contains(':')) {
         var aux = label.split(':');
-        account = aux[0].trim();
-        issuer = aux[1].trim();
+        issuer = aux[0].trim();
+        account = aux[1].trim();
       } else {
         account = label.trim();
       }

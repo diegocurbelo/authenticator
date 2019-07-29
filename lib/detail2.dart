@@ -21,6 +21,7 @@ class _DetailState extends State<Detail> {
   @override
   void initState() {
     super.initState();
+
     code = OTP.generateTOTPCode(widget.item.secret);
 
     timer = Timer.periodic(
@@ -50,19 +51,27 @@ class _DetailState extends State<Detail> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Padding(padding: EdgeInsets.only(top: 30.0)),
             Expanded(
               child: Center(
-                child: _build(),
-              ),
-            ),
-            Expanded(
-              child: Text(
-                code,
-                style: TextStyle(
-                    fontFamily: 'Kameron',
-                    fontSize: 80,
-                    color: countdown > 5 ? null : Color(0xFFD65E5F)),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    _buildIssuerImage(widget.item.issuer),
+                    Container(
+                      color: Color.fromRGBO(255, 255, 255, 0.75),
+                    ),
+                    Text(
+                      code,
+                      style: TextStyle(
+                          fontFamily: 'Kameron',
+                          fontSize: 80,
+                          color: countdown > 5 ? null : Color(0xFFD65E5F)),
+                    ),
+                  ],
+                ),
               ),
             ),
             _buildCountdownAnimation(countdown),
@@ -70,16 +79,6 @@ class _DetailState extends State<Detail> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _build() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        Padding(padding: EdgeInsets.only(top: 35.0)),
-        _buildIssuerImage(widget.item.issuer),
-      ],
     );
   }
 
@@ -93,10 +92,8 @@ class _DetailState extends State<Detail> {
 
     return Image.asset(
       'assets/issuers/$name-icon.png',
-      height: 155,
-      width: 155,
-      color: Color.fromRGBO(255, 255, 255, 0.6),
-      colorBlendMode: BlendMode.modulate,
+      height: 300,
+      width: 300,
     );
   }
 

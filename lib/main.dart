@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:authenticator/detail.dart';
 import 'package:authenticator/item.dart';
-import 'package:authenticator/otp.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Authenticator',
-      theme: ThemeData(primarySwatch: Colors.deepPurple),
+      theme: ThemeData(
+          primaryColor: Color(0xFF507FD4), // BLUE
+//          primaryColor: Color(0xFFD65E5F), // RED
+          scaffoldBackgroundColor: Colors.white),
+//      theme: ThemeData(primarySwatch: Colors.deepPurple),
       home: HomePage(),
     );
   }
@@ -56,6 +59,10 @@ class _HomePageState extends State<HomePage> {
       items.add(Item.fromUri(
           'otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
       items.add(Item.fromUri(
+          'otpauth://totp/Facebook:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Google:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
+      items.add(Item.fromUri(
           'otpauth://totp/Google:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
       _loading = false;
     });
@@ -65,6 +72,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(context),
+      drawer: _buildDrawer(context),
       body: _loading
           ? Center(
               child: CircularProgressIndicator(
@@ -79,24 +87,66 @@ class _HomePageState extends State<HomePage> {
                 return _buildItem(item);
               },
               separatorBuilder: (context, index) => Divider(
-                  // color: Colors.black,
-                  ),
+                color: Colors.grey,
+              ),
             ),
     );
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return AppBar(title: Text('Authenticator'), actions: <Widget>[
-      Builder(builder: (BuildContext context) {
-        return IconButton(
-          icon: const Icon(
-            Icons.add,
-            color: Colors.white,
+    return AppBar(
+      title: Text('Authenticator'),
+      actions: <Widget>[
+        Builder(builder: (BuildContext context) {
+          return IconButton(
+            icon: const Icon(
+              Icons.add,
+//            color: Colors.white,
+            ),
+            onPressed: () => _scan(context),
+          );
+        })
+      ],
+      elevation: 2.0,
+    );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      // Add a ListView to the drawer. This ensures the user can scroll
+      // through the options in the drawer if there isn't enough vertical
+      // space to fit everything.
+      child: ListView(
+        // Important: Remove any padding from the ListView.
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            child: Text('Drawer Header'),
+            decoration: BoxDecoration(
+              color: Color(0xFF507FD4),
+            ),
           ),
-          onPressed: () => _scan(context),
-        );
-      })
-    ]);
+          ListTile(
+            title: Text('Item 1'),
+            onTap: () {
+              // Update the state of the app
+              // ...
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: Text('Item 2'),
+            onTap: () {
+              // Update the state of the app
+              // ...
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildItem(Item item) {
@@ -141,6 +191,7 @@ class _HomePageState extends State<HomePage> {
       content: Text(message),
       action: SnackBarAction(
         label: 'Dismiss',
+        textColor: Color(0xFF507FD4),
         onPressed: () {},
       ),
     );
@@ -161,7 +212,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   _buildLogo(String issuer) {
-    var issuers = ['amazon', 'github', 'default'];
+    var issuers = ['amazon', 'facebook', 'github', 'google', 'default'];
 
     var name = issuer.toLowerCase();
     if (!issuers.contains(name)) {

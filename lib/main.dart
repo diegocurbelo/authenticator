@@ -6,8 +6,38 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:sentry/sentry.dart';
 
-void main() => runApp(MyApp());
+final SentryClient _sentry = new SentryClient(
+    dsn: 'https://eef4e72018df44ab839c8aacda7d51d5@sentry.io/1520834');
+
+bool get isInDebugMode {
+  bool inDebugMode = false;
+  assert(inDebugMode = true);
+  return inDebugMode;
+}
+
+Future<void> _reportError(dynamic error, dynamic stackTrace) async {
+  if (isInDebugMode) {
+    print(stackTrace);
+    return;
+  }
+  _sentry.captureException(
+    exception: error,
+    stackTrace: stackTrace,
+  );
+}
+
+Future<void> main() async {
+  runZoned<Future<void>>(() async {
+    runApp(MyApp());
+  }, onError: (error, stackTrace) async {
+    await _reportError(error, stackTrace);
+  });
+}
+
+// --
 
 class MyApp extends StatelessWidget {
   @override
@@ -15,10 +45,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Authenticator',
       theme: ThemeData(
-          primaryColor: Color(0xFF507FD4), // BLUE
+        primaryColor: Color(0xFF507FD4), // BLUE
+        canvasColor: Colors.white,
 //          primaryColor: Color(0xFFD65E5F), // RED
-          scaffoldBackgroundColor: Colors.white),
-//      theme: ThemeData(primarySwatch: Colors.deepPurple),
+//          scaffoldBackgroundColor: Colors.white),
+      ),
       home: HomePage(),
     );
   }
@@ -37,6 +68,7 @@ class _HomePageState extends State<HomePage> {
   String barcode = "";
 
   final storage = new FlutterSecureStorage();
+  final SlidableController slidableController = SlidableController();
 
   @override
   void initState() {
@@ -54,17 +86,26 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       items =
           store.values.map((item) => Item.fromJson(jsonDecode(item))).toList();
-      items.add(Item.fromUri(
-          'otpauth://totp/Github:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
-      items.add(Item.fromUri(
-          'otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
-      items.add(Item.fromUri(
-          'otpauth://totp/Facebook:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
-      items.add(Item.fromUri(
-          'otpauth://totp/Google:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
-      items.add(Item.fromUri(
-          'otpauth://totp/Google:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ'));
+
       _loading = false;
+    });
+    if (isInDebugMode) {
+      _loadTestData();
+    }
+  }
+
+  _loadTestData() async {
+    setState(() {
+      items.add(Item.fromUri(
+          'otpauth://totp/Github:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO1'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO2'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Facebook:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO3'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Google:john@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO4'));
+      items.add(Item.fromUri(
+          'otpauth://totp/Other:john@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO5'));
     });
   }
 
@@ -81,6 +122,7 @@ class _HomePageState extends State<HomePage> {
               ),
             )
           : ListView.separated(
+              padding: EdgeInsets.only(top: 10.0),
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
@@ -101,7 +143,6 @@ class _HomePageState extends State<HomePage> {
           return IconButton(
             icon: const Icon(
               Icons.add,
-//            color: Colors.white,
             ),
             onPressed: () => _scan(context),
           );
@@ -113,59 +154,138 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
-      // Add a ListView to the drawer. This ensures the user can scroll
-      // through the options in the drawer if there isn't enough vertical
-      // space to fit everything.
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
+      child: Column(
         children: <Widget>[
-          DrawerHeader(
-            child: Text('Drawer Header'),
-            decoration: BoxDecoration(
-              color: Color(0xFF507FD4),
+          Container(
+            height: 108.0,
+            child: DrawerHeader(
+              child: Image.asset('assets/issuers/default-icon.png'),
             ),
           ),
-          ListTile(
-            title: Text('Item 1'),
-            onTap: () {
-              // Update the state of the app
-              // ...
-              // Then close the drawer
-              Navigator.pop(context);
-            },
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(
+                    Icons.settings,
+                    size: 26,
+                  ),
+                  title: Text(
+                    'Settings',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(
+                    Icons.help_outline,
+                    size: 26.0,
+                  ),
+                  title: Text(
+                    'Help',
+                    style: TextStyle(fontSize: 18.0),
+                  ),
+                  onTap: () {
+                    // Update the state of the app
+                    // ...
+                    // Then close the drawer
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
           ),
-          ListTile(
-            title: Text('Item 2'),
-            onTap: () {
-              // Update the state of the app
-              // ...
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
+          Container(
+              padding: EdgeInsets.only(bottom: 20),
+              child: Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: Container(
+                      child: Column(
+                    children: <Widget>[
+                      Divider(),
+                      ListTile(
+                        leading: Icon(
+                          Icons.feedback,
+                          size: 24.0,
+                        ),
+                        title: Text(
+                          'Send feedback',
+                          style: TextStyle(fontSize: 18.0),
+                        ),
+                        onTap: () {
+                          // Update the state of the app
+                          // ...
+                          // Then close the drawer
+                          Navigator.pop(context);
+                        },
+                      ),
+//                          ListTile(
+//                              leading: Image.asset(
+//                                  'assets/issuers/default-icon.png'),
+//                              title: Text(
+//                                'v1.0.0',
+//                                textAlign: TextAlign.center,
+//                              ))
+                    ],
+                  ))))
         ],
       ),
     );
   }
 
   Widget _buildItem(Item item) {
-    return ListTile(
-        leading: _buildLogo(item.issuer),
-        title: Text(
-          item.issuer,
-          style: TextStyle(fontFamily: 'Karla', fontSize: 24),
+    return Slidable(
+      key: Key(item.uri),
+      controller: slidableController,
+      actionPane: SlidableDrawerActionPane(),
+      actionExtentRatio: 0.20,
+      child: Container(
+        color: Colors.white,
+        child: ListTile(
+            leading: _buildLogo(item.issuer),
+            title: Text(
+              item.issuer,
+              style: TextStyle(fontFamily: 'Karla', fontSize: 24),
+            ),
+            subtitle: Text(
+              item.account,
+              style: TextStyle(fontFamily: 'Karla', fontSize: 18),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Detail(item: item)),
+              );
+            }),
+      ),
+      actions: <Widget>[
+        IconSlideAction(
+//          color: Colors.blue,
+          icon: Icons.archive,
+          onTap: () => _showSnackBar(context, 'Archive'),
         ),
-        subtitle: Text(
-          item.account,
-          style: TextStyle(fontFamily: 'Karla', fontSize: 18),
+      ],
+      secondaryActions: <Widget>[
+        IconSlideAction(
+          foregroundColor: Colors.black45,
+          icon: Icons.edit,
+          onTap: () => _showSnackBar(context, 'More'),
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Detail(item: item)),
-          );
-        });
+        IconSlideAction(
+          icon: Icons.delete,
+          foregroundColor: Color(0xFFD65E5F),
+          onTap: () {
+            print("delte");
+          },
+        ),
+      ],
+    );
   }
 
   Future _scan(BuildContext context) async {

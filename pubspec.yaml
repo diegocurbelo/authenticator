@@ -1,7 +1,7 @@
 name: authenticator
-description: A new Flutter project.
+description: A minimalistic OTP generator.
 
-version: 1.0.0+9
+version: 1.0.0+11
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -9,13 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  barcode_scan: ^1.0.0
-  base32: ^1.0.1
-  crypto: ^2.0.6
+  barcode_scan: ^2.0.1
+  base32: ^1.1.1
   cupertino_icons: ^0.1.2
-  flutter_secure_storage: ^3.2.1+1
-  flutter_slidable: "^0.5.3"
-  sentry: ^2.2.0
+  flutter_secure_storage: ^3.3.1+1
+  provider: ^4.0.4
+  sentry: ^3.0.1
 
 dev_dependencies:
   flutter_test:
@@ -24,16 +23,16 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/issuers/
+
   fonts:
     - family: Karla
       fonts:
-        - asset: fonts/Karla-Regular.ttf
+        - asset: assets/fonts/Karla-Regular.ttf
     - family: Kameron
       fonts:
-        - asset: fonts/Kameron-Bold.ttf
+        - asset: assets/fonts/Kameron-Bold.ttf
     - family: Varela
       fonts:
-        - asset: fonts/VarelaRound-Regular.ttf
-
-  assets:
-    - assets/issuers/
+        - asset: assets/fonts/VarelaRound-Regular.ttf

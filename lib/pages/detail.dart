@@ -46,7 +46,7 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item.issuer),
-        elevation: 2.0,
+        elevation: 1,
       ),
       body: Center(
         child: Column(

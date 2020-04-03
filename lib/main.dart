@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:sentry/sentry.dart';
 
 import 'package:authenticator/pages/home.dart';
+import 'package:authenticator/pages/help.dart';
+import 'package:authenticator/pages/send_feedback.dart';
 import 'package:authenticator/store/store.dart';
 
 final SentryClient _sentry = new SentryClient(
@@ -43,10 +45,15 @@ class App extends StatelessWidget {
         child: MaterialApp(
           title: 'Authenticator',
           theme: ThemeData(
-            primaryColor: Color(0xFF507FD4),
+            primaryColor: Colors.white, //Color(0xFF507FD4),
             canvasColor: Colors.white,
           ),
           home: HomePage(),
+          routes: {
+            '/help': (context) => HelpPage(),
+            '/send_feedback': (context) => SendFeedbackPage(),
+          },
+          debugShowCheckedModeBanner: false,
         ));
   }
 }

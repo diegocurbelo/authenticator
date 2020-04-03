@@ -19,19 +19,6 @@ class Sidebar extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.zero,
               children: <Widget>[
-//                ListTile(
-//                  leading: Icon(
-//                    Icons.settings,
-//                    size: 26,
-//                  ),
-//                  title: Text(
-//                    'Settings',
-//                    style: TextStyle(fontSize: 18),
-//                  ),
-//                  onTap: () {
-//                    Navigator.pop(context);
-//                  },
-//                ),
                 ListTile(
                   leading: Icon(
                     Icons.help_outline,

@@ -15,10 +15,6 @@ class Store with ChangeNotifier {
     load();
   }
 
-//    Map<String, String> store = await storage.readAll();
-//    items =
-//        store.values.map((item) => Item.fromJson(jsonDecode(item))).toList();
-
   bool get loading => _loading;
 
   UnmodifiableListView get items => UnmodifiableListView(_items);
@@ -26,24 +22,10 @@ class Store with ChangeNotifier {
   // --
 
   Future<void> load() async {
-    await _storage.write(key: "items", value: jsonEncode(items));
-
     String value = await _storage.read(key: "items");
-    print(value);
-
-//    if (value != null) {
+    if (value != null) {
       _items = List<Item>.from(json.decode(value).map((i) => Item.fromJson(i)));
-//    }
-//    _items.add(Item.fromUri(
-//        'otpauth://totp/Github:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO1'));
-//    _items.add(Item.fromUri(
-//        'otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO2'));
-//    _items.add(Item.fromUri(
-//        'otpauth://totp/Facebook:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO3'));
-//    _items.add(Item.fromUri(
-//        'otpauth://totp/Google:john@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO4'));
-//    _items.add(Item.fromUri(
-//        'otpauth://totp/Other:john@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO5'));
+    }
 
     _loading = false;
     notifyListeners();

@@ -45,7 +45,15 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text('Authenticator'),
+      title: Container(
+        height: 108.0,
+        child: DrawerHeader(
+          child: Image.asset(
+            'assets/issuers/default-icon.png',
+            scale: 13,
+          ),
+        ),
+      ),
       actions: <Widget>[
         Builder(builder: (BuildContext context) {
           return IconButton(
@@ -56,7 +64,7 @@ class _HomePageState extends State<HomePage> {
           );
         })
       ],
-      elevation: 2.0,
+      elevation: 1,
     );
   }
 
@@ -93,7 +101,7 @@ class _HomePageState extends State<HomePage> {
 
   Future _scan(BuildContext context) async {
     try {
-      String uri = "otpauth://totp/Amazon:john.doe@email.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBO2"; // await BarcodeScanner.scan();
+      String uri = await BarcodeScanner.scan();
       Item item = Provider.of<Store>(context, listen: false).addItem(uri);
       Navigator.push(
         context,
@@ -125,4 +133,5 @@ class _HomePageState extends State<HomePage> {
     );
     Scaffold.of(context).showSnackBar(snackBar);
   }
+
 }
